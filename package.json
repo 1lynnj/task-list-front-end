@@ -51,5 +51,8 @@
     "eslint-plugin-testing-library": "^5.0.0",
     "gh-pages": "^3.2.3",
     "prettier": "^2.4.1"
+  },
+  "resolutions": {
+    "autoprefixer": "10.4.5"
   }
 }

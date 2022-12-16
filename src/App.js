@@ -1,27 +1,45 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import TaskList from './components/TaskList.js';
 import './App.css';
 
-const TASKS = [
-  {
-    id: 1,
-    title: 'Mow the lawn',
-    isComplete: false,
-  },
-  {
-    id: 2,
-    title: 'Cook Pasta',
-    isComplete: true,
-  },
-];
+// const TASKS = [
+//   {
+//     id: 1,
+//     title: 'Mow the lawn',
+//     isComplete: false,
+//   },
+//   {
+//     id: 2,
+//     title: 'Cook Pasta',
+//     isComplete: true,
+//   },
+// ];
 
 const App = () => {
-  const tasksCopy = TASKS.map((task) => {
-    return { ...task };
-  });
+  // const tasksCopy = TASKS.map((task) => {
+  //   return { ...task };
+  // });
+  const [tasksList, setTasksList] = useState([]);
+  const URL = 'http://127.0.0.1:5000';
 
-  const [tasksList, setTasksList] = useState(tasksCopy);
+  useEffect(() => {
+    axios
+      .get(`${URL}/tasks`)
+      .then((response) => {
+        console.log(response);
+        const tasksAPIResponseCopy = response.data.map((task) => {
+          return {
+            ...task,
+          };
+        });
+        setTasksList(tasksAPIResponseCopy);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
 
   const updateComplete = (taskId) => {
     console.log('update iscomplete called');
@@ -41,16 +59,21 @@ const App = () => {
   };
 
   const deleteTask = (taskId) => {
-    console.log(`🌼 ${tasksList}`);
-    console.log('delete task called');
-    const newTasksList = [];
-    for (const task of tasksList) {
-      if (task.id !== taskId) {
-        newTasksList.push(task);
-      }
-    }
-    setTasksList(newTasksList);
-    console.log(newTasksList);
+    console.log('deleteTask called');
+    axios
+      .delete(`${URL}/tasks/${taskId}`)
+      .then(() => {
+        const newTasksList = [];
+        for (const task of tasksList) {
+          if (task.id !== taskId) {
+            newTasksList.push(task);
+          }
+        }
+        setTasksList(newTasksList);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   return (
