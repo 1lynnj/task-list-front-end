@@ -22,6 +22,7 @@ const App = () => {
   //   return { ...task };
   // });
   const [tasksList, setTasksList] = useState([]);
+  // Back-end URL
   const URL = 'http://127.0.0.1:5000';
 
   useEffect(() => {
@@ -43,19 +44,26 @@ const App = () => {
 
   const updateComplete = (taskId) => {
     console.log('update iscomplete called');
-    const newTasksList = [];
-    for (const task of tasksList) {
-      if (task.id !== taskId) {
-        newTasksList.push(task);
-      } else {
-        const newTask = {
-          ...task,
-          isComplete: !task.isComplete,
-        };
-        newTasksList.push(newTask);
-      }
-    }
-    setTasksList(newTasksList);
+    axios
+      .patch(`${URL}/tasks/${taskId}/mark_complete`)
+      .then(() => {
+        const newTasksList = [];
+        for (const task of tasksList) {
+          if (task.id !== taskId) {
+            newTasksList.push(task);
+          } else {
+            const newTask = {
+              ...task,
+              isComplete: !task.isComplete,
+            };
+            newTasksList.push(newTask);
+          }
+        }
+        setTasksList(newTasksList);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const deleteTask = (taskId) => {
