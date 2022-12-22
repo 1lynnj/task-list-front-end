@@ -4,32 +4,41 @@ import PropTypes from 'prop-types';
 import './Task.css';
 
 const Task = ({ id, title, isComplete, updateComplete, deleteTask }) => {
-  console.log(updateComplete);
   const updateCompleteButtonClick = () => {
+    console.log(
+      `1. Button was clicked on a task that is ${
+        isComplete ? 'complete' : 'incomplete'
+      }`
+    );
     const updatedTask = {
       id: id,
       title: title,
-      isComplete: updateComplete,
+      isComplete: !isComplete,
       deleteTask: deleteTask,
     };
+    console.log(
+      `2. New task is ${JSON.stringify(
+        updatedTask
+      )}. Next, call updateComplete.`
+    );
     updateComplete(id, updatedTask);
   };
 
   const buttonClass = isComplete ? 'tasks__item__toggle--completed' : '';
 
   return (
-    <li className="tasks__item">
+    <li key={id} className="tasks__item">
       <button
         className={`tasks__item__toggle ${buttonClass}`}
         onClick={() => updateCompleteButtonClick()}
       >
-        {title}
+        {id} {title}
       </button>
       <button
         className="tasks__item__remove button"
         onClick={() => deleteTask(id)}
       >
-        x
+        Delete
       </button>
     </li>
   );

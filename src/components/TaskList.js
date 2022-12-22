@@ -28,7 +28,7 @@ TaskList.propTypes = {
       title: PropTypes.string.isRequired,
       isComplete: PropTypes.bool.isRequired,
     })
-  ).isRequired,
+  ),
   updateComplete: PropTypes.func.isRequired,
   deleteTask: PropTypes.func.isRequired,
 };

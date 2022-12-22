@@ -2,6 +2,8 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import TaskList from './components/TaskList.js';
+import NewTaskForm from './components/NewTaskForm.js';
+
 import './App.css';
 
 // const TASKS = [
@@ -23,14 +25,16 @@ const App = () => {
   // });
   const [tasksList, setTasksList] = useState([]);
   // Back-end URL
-  const URL = 'http://127.0.0.1:5000';
+  const URL = 'http://127.0.0.1:5000/tasks';
 
-  useEffect(() => {
+  const fetchAllTasks = () => {
     axios
-      .get(`${URL}/tasks`)
+      .get(URL)
       .then((response) => {
         console.log(response);
         const tasksAPIResponseCopy = response.data.map((task) => {
+          task.isComplete = task.is_complete;
+          delete task['is_complete'];
           return {
             ...task,
           };
@@ -40,25 +44,44 @@ const App = () => {
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  };
 
-  const updateComplete = (taskId) => {
-    console.log('update iscomplete called');
+  useEffect(fetchAllTasks, []);
+
+  const updateComplete = (taskId, updatedTask) => {
+    console.log(`3. updateComplete called with ${JSON.stringify(updatedTask)}`);
+
+    let status = '';
+    if (updatedTask.isComplete) {
+      console.log(
+        `4a. updatedTask.isComplete is ${updatedTask.isComplete}, so mark_complete`
+      );
+      status = 'mark_complete';
+    } else {
+      console.log(
+        `4bs. updatedTask.isComplete is ${updatedTask.isComplete}, so mark_incomplete`
+      );
+      status = 'mark_incomplete';
+    }
+    console.log('5. Update the database');
+    const newTasksList = [];
     axios
-      .patch(`${URL}/tasks/${taskId}/mark_complete`)
+      .patch(`${URL}/${taskId}/${status}`)
       .then(() => {
-        const newTasksList = [];
         for (const task of tasksList) {
           if (task.id !== taskId) {
             newTasksList.push(task);
           } else {
+            console.log(`6. Updated task in list is ${updatedTask.isComplete}`);
             const newTask = {
               ...task,
-              isComplete: !task.isComplete,
+              isComplete: updatedTask.isComplete,
             };
+            console.log(`7. newTask is ${JSON.stringify(newTask)}`);
             newTasksList.push(newTask);
           }
         }
+        console.log('8. Update the task list.');
         setTasksList(newTasksList);
       })
       .catch((error) => {
@@ -69,7 +92,7 @@ const App = () => {
   const deleteTask = (taskId) => {
     console.log('deleteTask called');
     axios
-      .delete(`${URL}/tasks/${taskId}`)
+      .delete(`${URL}/${taskId}`)
       .then(() => {
         const newTasksList = [];
         for (const task of tasksList) {
@@ -77,6 +100,25 @@ const App = () => {
             newTasksList.push(task);
           }
         }
+        setTasksList(newTasksList);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const addNewTask = (newTask) => {
+    console.log('add new task is called');
+    // newTask = {
+    //   title: '',
+    // };
+    axios
+      .post(URL, newTask)
+      .then((response) => {
+        let task = response.data.task;
+        task.isComplete = task.is_complete;
+        const newTasksList = [...tasksList];
+        newTasksList.push(response.data.task);
         setTasksList(newTasksList);
       })
       .catch((error) => {
@@ -99,6 +141,7 @@ const App = () => {
             />
           }
         </div>
+        <NewTaskForm addTaskCallback={addNewTask}></NewTaskForm>
       </main>
     </div>
   );
